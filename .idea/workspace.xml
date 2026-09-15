@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5bce0cc8-d101-400a-ae95-accae01b443f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/HolaMundoIBeacon/HolaMundoIBeacon/Publicador.h" beforeDir="false" afterPath="$PROJECT_DIR$/HolaMundoIBeacon/HolaMundoIBeacon/Publicador.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HolaMundoIBeacon/HolaMundoIBeacon/ServicioEnEmisora.h" beforeDir="false" afterPath="$PROJECT_DIR$/HolaMundoIBeacon/HolaMundoIBeacon/ServicioEnEmisora.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/HolaMundoIBeacon/HolaMundoIBeacon" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3JEN6owYLw3p3wO5ctiK69biCYC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Lucia/Downloads/Sprint 0/BTLEAlumnos2021/BTLEAlumnos2021"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Lucia\Downloads\Sprint 0\BTLEAlumnos2021\BTLEAlumnos2021" />
+    </key>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5bce0cc8-d101-400a-ae95-accae01b443f" name="Changes" comment="" />
+      <created>1789222094897</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1789222094897</updated>
+    </task>
+    <servers />
+  </component>
+</project>
