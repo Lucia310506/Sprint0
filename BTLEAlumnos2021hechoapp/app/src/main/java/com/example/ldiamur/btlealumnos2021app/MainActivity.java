@@ -24,8 +24,15 @@ import java.util.List;
 import java.util.UUID;
 
 // ------------------------------------------------------------------
+// class MainActivity
+//Es la pantalla principal de la app.
+//   Se encarga de:
+//   - pedir los permisos de Bluetooth/Localización que falten según la
+//     versión de Android (API >= 31 usa BLUETOOTH_SCAN/CONNECT)
+//   - escanear BLE en busca de todos los dispositivos o de uno concreto
+//   - parsear cada anuncio como TramaIBeacon y volcarlo a logcat
+//     (uuid, major, minor, txPower, rssi)
 // ------------------------------------------------------------------
-
 public class MainActivity extends AppCompatActivity {
 
     // --------------------------------------------------------------

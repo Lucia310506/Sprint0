@@ -8,6 +8,17 @@
 #define PUBLICADOR_H_INCLUIDO
 
 // --------------------------------------------------------------
+// class Publicador
+// Orquesta el anuncio iBeacon con las mediciones:
+//   guarda el UUID y la configuración de la emisora (nombre, txPower, RSSI),
+//   define los tipos de medición (MedicionesID) y publica cada medida
+//   como un iBeacon donde:
+//     major = (tipo de medición << 8) + contador
+//     minor = valor medido
+//   publicarCO2()/publicarTemperatura() emiten el anuncio, esperan y lo paran.
+// --------------------------------------------------------------
+
+// --------------------------------------------------------------
 // --------------------------------------------------------------
 class Publicador {
 
@@ -15,6 +26,12 @@ class Publicador {
   // ............................................................
 private:
 //Mensaje que se envia
+// ******************************************
+// ******************************************
+//  SE MODIFICA: el UUID del beacon (16 bytes = 16 caracteres)
+//  La app lo muestra en logcat como "uuid = EPSG-GTI-PROY-3A"
+// ******************************************
+// ******************************************
   uint8_t beaconUUID[16] = { 
 	'E', 'P', 'S', 'G', '-', 'G', 'T', 'I', 
 	'-', 'P', 'R', 'O', 'Y', '-', '3', 'A'
@@ -24,6 +41,16 @@ private:
   // ............................................................
 public:
 //Beacon que se envía.
+// ******************************************
+// ******************************************
+//  SE MODIFICA: los datos de identificación de la emisora
+//    "GTI-3A"   -> nombre que la app usa para filtrar (el del archivo
+//                  .ino aparece como dispositivoBuscado, p.ej. "fistro")
+//    0x004c     -> fabricanteID (NO tocar: es Apple, los iBeacon lo exigen)
+//    4          -> txPower (potencia de transmisión en dBm)
+//  La app también usa RSSI (más abajo) para el campo rssi del anuncio.
+// ******************************************
+// ******************************************
   EmisoraBLE laEmisora {
 	"GTI-3A", //  nombre emisora
 	  0x004c, // fabricanteID (Apple)
@@ -65,6 +92,13 @@ public:
 	//
 	// 1. empezamos anuncio
 	//
+	// ******************************************
+	//  SE MODIFICA: los valores que viajan en el beacon
+	//    major = (tipo de medición << 8) + contador
+	//            MedicionesID::CO2 = 11  (ver enum más abajo)
+	//    minor = valorCO2 (lo que devuelve elMedidor.medirCO2())
+	//  La app los lee en logcat como "major" y "minor".
+	// ******************************************
 	uint16_t major = (MedicionesID::CO2 << 8) + contador;
 	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, 
 											major,
@@ -98,6 +132,12 @@ public:
   void publicarTemperatura( int16_t valorTemperatura,
 							uint8_t contador, long tiempoEspera ) {
 
+	// ******************************************
+	//  SE MODIFICA: igual que en publicarCO2()
+	//    major = (MedicionesID::TEMPERATURA << 8) + contador
+	//    minor = valorTemperatura
+	//  MedicionesID::TEMPERATURA = 12  (ver enum más abajo)
+	// ******************************************
 	uint16_t major = (MedicionesID::TEMPERATURA << 8) + contador;
 	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, 
 											major,

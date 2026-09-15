@@ -6,7 +6,11 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 // -----------------------------------------------------------------------------------
-// @author: Jordi Bataller i Mascarell
+// class Utilidades
+//  Funciones auxiliares de conversión de datos usadas por la app:
+//   - bytes <-> String / hex / UUID
+//   - bytesToInt() pasa 1-4 bytes a int con signo correcto
+//   - stringToBytes() usa UTF-8 explícito
 // -----------------------------------------------------------------------------------
 public class Utilidades {
 

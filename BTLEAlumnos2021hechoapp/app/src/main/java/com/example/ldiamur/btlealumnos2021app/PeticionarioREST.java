@@ -12,6 +12,13 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 // ------------------------------------------------------------------------
+// class PeticionarioREST
+//  Envía peticiones HTTP/REST (GET, POST, ...) en segundo plano
+//   (AsyncTask, para no bloquear la interfaz) y devuelve el código y el
+//   cuerpo de la respuesta mediante un callback (RespuestaREST).
+//   - Aplica timeouts de 5 s para no quedarse colgado
+//   - Envía el cuerpo en UTF-8 y Content-Type application/json; charset=utf-8
+//   - Si el servidor no responde bien, no rompe la app
 // ------------------------------------------------------------------------
 public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
 

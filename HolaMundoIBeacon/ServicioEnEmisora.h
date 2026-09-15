@@ -42,6 +42,14 @@ uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, int tamMax
 } // ()
 
 // ----------------------------------------------------------
+// class ServicioEnEmisora (y su clase anidada Caracteristica)
+// Representa un servicio BLE en la emisora:
+//   un servicio agrupa características que el teléfono puede leer/escribir.
+//   - Caracteristica: define una característica (uuid, propiedades
+//     read/write/notify, permisos) y permite escribir/notificar datos o
+//     instalar un callback cuando el móvil la escriba.
+//   - ServicioEnEmisora: agrupa varias Caracteristica y las activa en la
+//     emisora cuando se llama a activarServicio().
 // ----------------------------------------------------------
 class ServicioEnEmisora {
 

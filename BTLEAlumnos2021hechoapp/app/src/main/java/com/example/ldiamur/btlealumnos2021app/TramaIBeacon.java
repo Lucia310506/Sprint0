@@ -4,7 +4,12 @@ package com.example.ldiamur.btlealumnos2021app;
 import java.util.Arrays;
 
 // -----------------------------------------------------------------------------------
-// @author: Jordi Bataller i Mascarell
+// class TramaIBeacon
+//Parsea los bytes de un anuncio BLE y extrae los campos de un
+//   iBeacon: prefijo (9 bytes), uuid (16), major (2), minor (2) y txPower (1).
+//   - El constructor valida que la trama tenga al menos 30 bytes (si no, no parsea).
+//   - esIBeacon() dice si el anuncio es un iBeacon de verdad de Apple
+//     (companyID 0x004C, tipo 0x02, longitud 0x15).
 // -----------------------------------------------------------------------------------
 public class TramaIBeacon {
     private byte[] prefijo = null; // 9 bytes

@@ -21,6 +21,14 @@
 #include "ServicioEnEmisora.h"
 
 // ----------------------------------------------------------
+// class EmisoraBLE
+// Envuelve la emisora BLE de la placa (Bluefruit):
+//   - encenderEmisora() inicializa Bluetooth
+//   - emitirAnuncioIBeacon() emite un anuncio iBeacon con uuid, major,
+//     minor y rssi dados (es el método que usa Publicador)
+//   - detenerAnuncio() / estaAnunciando() controlan la emisión
+//   - anyadirServicio...() sirve si además quieres un servicio GATT
+//   - en el constructor se fija el nombre, fabricante y txPower
 // ----------------------------------------------------------
 class EmisoraBLE {
 private:

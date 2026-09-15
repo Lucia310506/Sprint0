@@ -15,6 +15,12 @@ void esperar (long tiempo) {
 }
 
 // ----------------------------------------------------------
+// class LED 
+// Controla el LED de la placa:
+//   encender()/apagar() prueban el LED,
+//   alternar() cambia su estado,
+//   brillar(tiempo) lo enciende, espera y lo apaga.
+// esperar(tiempo) es una utilidad que llama a delay().
 // ----------------------------------------------------------
 class LED {
 private:

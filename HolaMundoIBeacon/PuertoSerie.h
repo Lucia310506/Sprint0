@@ -10,6 +10,11 @@
 #define PUERTO_SERIE_H_INCLUIDO
 
 // ----------------------------------------------------------
+// class PuertoSerie
+//  Encapsula el puerto serie del Arduino/Bluefruit:
+//   - el constructor arranca Serial a la velocidad (baudios) indicada
+//   - esperarDisponible() bloquea hasta que el puerto está listo
+//   - escribir(...) manda un mensaje por el puerto (para logs)
 // ----------------------------------------------------------
 class PuertoSerie  {
 
