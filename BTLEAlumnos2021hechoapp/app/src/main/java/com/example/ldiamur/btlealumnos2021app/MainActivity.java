@@ -172,7 +172,11 @@ public class MainActivity extends AppCompatActivity {
         //Log.d(ETIQUETA_LOG, "  buscarEsteDispositivoBTLE(): empezamos a escanear buscando: " + dispositivoBuscado
           //      + " -> " + Utilidades.stringToUUID( dispositivoBuscado ) );
 
-        this.elEscanner.startScan( this.callbackDelEscaneo );
+        this.elEscanner.startScan(
+                java.util.Collections.singletonList(sf),
+                new android.bluetooth.le.ScanSettings.Builder().build(),
+                this.callbackDelEscaneo
+        );
     } // ()
 
     // --------------------------------------------------------------
@@ -202,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         //this.buscarEsteDispositivoBTLE( Utilidades.stringToUUID( "EPSG-GTI-PROY-3A" ) );
 
         //this.buscarEsteDispositivoBTLE( "EPSG-GTI-PROY-3A" );
-        this.buscarEsteDispositivoBTLE( "fistro" );
+        this.buscarEsteDispositivoBTLE( "GTI-3A" );
 
     } // ()
 
