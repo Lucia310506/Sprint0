@@ -22,23 +22,46 @@ function hacerLogin( nombre, password, cb ) {
 
 	// preparar la llamada remota
 	var xmlhttp = new XMLHttpRequest();
+
 	xmlhttp.onreadystatechange = function() {
 		// callback para cuando llegue la respuesta
 		// de la petición que haremos más abajo
 
-		if( this.readyState == 4 && this.status == 200 ){
-			// este es el texto JSON recibido la llamada a
-			// demo_file.php, pasado a objeto JSON 
-			console.log( "recibo: " + this.responseText )
-			var resultado = JSON.parse(this.responseText);
+		if( this.readyState == 4 ){
 
+			// ANTES->DESPUÉS (B4): antes solo se atendía cuando status==200;
+			// con 400/401/500 la interfaz se quedaba esperando.
+			// MOTIVO: hay que devolver siempre algo al callback.
+			if ( this.status != 200 ) {
+				cb( { resultado: false, error: "error HTTP " + this.status } )
+				return
+			}
+
+			// ANTES->DESPUÉS (B5): JSON.parse() podía lanzar excepción si el
+			// servidor devolvía algo que no es JSON (p.ej. un warning PHP).
+			// MOTIVO: no romper la interfaz ante una respuesta inválida.
+			var resultado
+			try {
+				resultado = JSON.parse( this.responseText )
+			} catch ( e ) {
+				cb( { resultado: false, error: "respuesta JSON inválida" } )
+				return
+			}
+
+			console.log( "recibo: " + this.responseText )
 			cb( resultado ) // devuelvo el resultado
 		}
 	};
 	
+	// ANTES->DESPUÉS (V2/V7): se enviaba por GET y las credenciales quedaban
+	//        en la URL. MOTIVO: el login debe ir por POST.
+	// ANTES->DESPUÉS (V6): nombre/password se pegaban sin codificar; con
+	//        caracteres como &, ?, =, # se rompía la consulta.
+	//        MOTIVO: encodeURIComponent() escapa esos caracteres.
 	// llamamos *remotamente* al fichero hacerLogin.php
 	// (la verdadera función de la lógica)
-	xmlhttp.open("GET", "../rest/hacerLogin.php?nombre="+nombre+"&password="+password, true);
-	xmlhttp.send();
+	xmlhttp.open("POST", "../rest/hacerLogin.php", true);
+	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xmlhttp.send( "nombre=" + encodeURIComponent(nombre) + "&password=" + encodeURIComponent(password) );
 
 } // ()

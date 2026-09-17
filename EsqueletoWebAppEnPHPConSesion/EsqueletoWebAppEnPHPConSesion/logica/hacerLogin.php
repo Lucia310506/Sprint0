@@ -17,7 +17,13 @@
 
 function hacerLogin( $nombre, $password ) {
 
-  // comprobación "rigurosa" del password
+  // **********************************************************
+  // ANTES->DESPUÉS (V1): la contraseña era "1234" hardcodeada.
+  //        MOTIVO: es una credencial SOLO de práctica del esqueleto.
+  //        En producción la comprobación debe ir contra un hash
+  //        guardado en BD (p.ej. password_hash()/password_verify()),
+  //        nunca con un texto fijo en el código.
+  // **********************************************************
   if ( $password == "1234" ) {
     return true;
   }
