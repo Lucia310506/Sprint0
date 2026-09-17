@@ -116,7 +116,14 @@ public class TramaIBeacon {
             return false;
         }
 
-        int id = ( (companyID[0] & 0xFF) << 8 ) | ( companyID[1] & 0xFF );
+        // ANTES->DESPUÉS: aquí se juntaban los 2 bytes en big-endian
+        //        (((companyID[0]) << 8) | companyID[1]), con lo que {0x4C,0x00}
+        //        daba 0x4C00 y nunca coincidía con 0x004C: TODO iBeacon de verdad
+        //        se descartaba (esIBeacon() siempre false).
+        // MOTIVO: el campo companyID de un anuncio BLE va en little-endian, así
+        //         que {0x4C,0x00} son 0x004C. Se lee al revés para obtener el
+        //         identificador real de 16 bits.
+        int id = ( (companyID[1] & 0xFF) << 8 ) | ( companyID[0] & 0xFF );
 
         return      id == 0x004C
                 && ( iBeaconType & 0xFF ) == 0x02

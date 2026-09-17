@@ -402,6 +402,14 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(ETIQUETA_LOG, " onCreate(): empieza ");
 
+        // ANTES->DESPUÉS: al arrancar la app no se comprobaba nada, así que un
+        // fallo en las conversiones de bytes/uuid o en el parseo del iBeacon solo
+        // se veía al usar la app. AHORA, al arrancar, se lanzan unas pruebas
+        // automáticas (power-on self test) que escriben TEST OK / TEST FALLIDO
+        // en logcat (filtrar por ">>>>"). Es el equivalente Android de
+        // AutoTests::ejecutarAutoTests() en setup() de la placa Arduino.
+        AutoTests.ejecutarAutoTests();
+
         inicializarBlueTooth();
 
         Log.d(ETIQUETA_LOG, " onCreate(): termina ");
