@@ -9,7 +9,13 @@
 
 // ----------------------------------------------------
 // ----------------------------------------------------
-#include <vector>
+// **************************************************
+//  ANTES->DESPUÉS: se quita #include <vector> y std::vector.
+//  MOTIVO: el toolchain de la placa no enlaza la STL completa
+//          (fallo del linker: std::__throw_length_error). Se
+//          sustituye por un array fijo (máx. 4 características).
+// **************************************************
+#define MAX_CARACTERISTICAS 4
 
 // ----------------------------------------------------
 // alReves() utilidad
@@ -240,7 +246,10 @@ private:
   //
   //
   //
-  std::vector< Caracteristica * > lasCaracteristicas;
+  // ANTES->DESPUÉS: era std::vector<Caracteristica*> y ahora un array fijo.
+  // MOTIVO: evitar la STL (no enlaza en la placa) y no reservar memoria dinámica.
+  Caracteristica * lasCaracteristicas[ MAX_CARACTERISTICAS ] = { nullptr };
+  int numCaracteristicas = 0;
 
 public:
   
@@ -269,7 +278,12 @@ public:
 	//car:Caracteristica->anyadirCaracteristica()->Clase(Modificar)
   // .........................................................
   void anyadirCaracteristica( Caracteristica & car ) {
-	(*this).lasCaracteristicas.push_back( & car );
+	// ANTES->DESPUÉS: era push_back() del vector, ahora guardo el puntero
+	// en el array (con tope para no salirme).
+	if ( (*this).numCaracteristicas < MAX_CARACTERISTICAS ) {
+	  (*this).lasCaracteristicas[ (*this).numCaracteristicas ] = & car;
+	  (*this).numCaracteristicas++;
+	} // if
   } // ()
 
   // .........................................................
@@ -293,8 +307,10 @@ public:
 	  return false;
 	} // if
 
-	for( auto pCar : (*this).lasCaracteristicas ) {
-	  (*pCar).activar();
+	// ANTES->DESPUÉS: era un range-for sobre el vector; ahora recorro el
+	// array hasta numCaracteristicas.
+	for( int i = 0; i < (*this).numCaracteristicas; i++ ) {
+	  (*this).lasCaracteristicas[ i ]->activar();
 	} // for
 
 	return true;
