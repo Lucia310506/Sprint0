@@ -11,6 +11,8 @@
 <!-- ---------------------------------------------------- -->
 <script src="logicaFake/diHola.js"></script>
 <script src="logicaFake/hacerLogin.js"></script>
+<!-- tests automáticos: se ejecutan al cargar y escriben TEST OK/FALLIDO en la consola -->
+<script src="logicaFake/AutoTests.js"></script>
 
 <!-- ---------------------------------------------------- -->
 <script>
@@ -23,7 +25,7 @@ diHola( function( err, res ) {
    return
   }
 
-  // ANTES->DESPUÉS (B8/V8): se usaba innerHTML con datos del servidor →
+  // ANTES->DESPUÉS : se usaba innerHTML con datos del servidor →
   //        XSS potencial si el nombre contuviera HTML/JavaScript.
   //        MOTIVO: textContent trata el texto como texto simple.
   document.getElementById("salida").textContent = res.nombre + " dice: "
