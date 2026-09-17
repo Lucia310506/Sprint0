@@ -1,13 +1,12 @@
-
 package com.example.ldiamur.btlealumnos2021app;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -41,8 +40,20 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
     // --------------------------------------------------------------------
     // metodo:texto, urlDestino:texto, cuerpo:texto,->hacerPeticionREST()->Clase(Modificar)
     // laRespuesta:RespuestaREST
+    //
+    // ANTES: no validábamos método ni URL; con metodo = null, setRequestMethod(null)
+    //        lanzaba excepción a mitad del envío.
+    // PROBLEMA (P3): un null podía romper la petición en mitad del envío.
+    // AHORA: validamos antes de empezar.
     // --------------------------------------------------------------------
     public void hacerPeticionREST (String metodo, String urlDestino, String cuerpo, RespuestaREST  laRespuesta) {
+        if ( metodo == null || metodo.trim().isEmpty() ) {
+            throw new IllegalArgumentException( "Método HTTP no válido: " + metodo );
+        }
+        if ( urlDestino == null || urlDestino.trim().isEmpty() ) {
+            throw new IllegalArgumentException( "URL destino no válida" );
+        }
+
         this.elMetodo = metodo;
         this.urlDestino = urlDestino;
         this.elCuerpo = cuerpo;
@@ -66,6 +77,7 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
     protected Boolean doInBackground(Void... params) {
         Log.d("clienterestandroid", "doInBackground()");
 
+        HttpURLConnection connection = null;
         try {
 
             // envio la peticion
@@ -77,8 +89,18 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
 
             URL url = new URL(urlDestino);
 
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestProperty( "Content-Type", "application/json; charset-utf-8" );
+            connection = (HttpURLConnection) url.openConnection();
+
+            // ANTES->DESPUÉS (P1): no existían timeouts aunque el comentario afirmaba
+            // "Aplica timeouts de 5 s"; una conexión podía quedarse colgada.
+            // MOTIVO: sin timeouts la app puede bloquearse esperando una respuesta eterna.
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            // ANTES->DESPUÉS (P7): el header decía "charset-utf-8" (con guion, incorrecto)
+            // y el cuerpo se enviaba con writeBytes() que no garantiza UTF-8.
+            // MOTIVO: el servidor debe interpretar el cuerpo como UTF-8 realmente.
+            connection.setRequestProperty( "Content-Type", "application/json; charset=utf-8" );
             connection.setRequestMethod(this.elMetodo);
             // connection.setRequestProperty("Accept", "*/*);
 
@@ -88,17 +110,16 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
             if ( ! this.elMetodo.equals("GET") && this.elCuerpo != null ) {
                 Log.d("clienterestandroid", "doInBackground(): no es get, pongo cuerpo");
                 connection.setDoOutput(true);
-                // si no es GET, pongo el cuerpo que me den en la peticin
-                DataOutputStream dos = new DataOutputStream (connection.getOutputStream());
-                dos.writeBytes(this.elCuerpo);
-                dos.flush();
-                dos.close();
+                // si no es GET, pongo el cuerpo que me den en la petición
+                connection.getOutputStream().write( this.elCuerpo.getBytes(StandardCharsets.UTF_8) ); // P7
             }
 
-            // ya he enviado la peticin
-            Log.d("clienterestandroid", "doInBackground(): peticin enviada ");
+            // ya he enviado la petición
+            Log.d("clienterestandroid", "doInBackground(): petición enviada ");
 
+            // ............................................................
             // ahora obtengo la respuesta
+            // ............................................................
 
             int rc = connection.getResponseCode();
             String rm = connection.getResponseMessage();
@@ -106,37 +127,46 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
             Log.d("clienterestandroid", "doInBackground() recibo respuesta = " + respuesta);
             this.codigoRespuesta = rc;
 
-            try {
+            // ANTES->DESPUÉS (P5): antes se hacía getInputStream() siempre y, ante
+            // errores HTTP (400/404/500), se lanzaba excepción pero se devolvía true
+            // igualmente. AHORA usamos getErrorStream() según el código y, además,
+            // devolvemos false si no se pudo leer el cuerpo.
+            InputStream is = ( rc >= 400 ) ? connection.getErrorStream() : connection.getInputStream();
 
-                InputStream is = connection.getInputStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            if ( is != null ) {
+                // ANTES->DESPUÉS (P8): antes se leía la respuesta con el charset por
+                // defecto del sistema; AHORA con UTF-8 explícito.
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
                 Log.d("clienterestandroid", "leyendo cuerpo");
                 StringBuilder acumulador = new StringBuilder ();
                 String linea;
                 while ( (linea = br.readLine()) != null) {
-                    Log.d("clienterestandroid", linea);
+                    // ANTES->DESPUÉS (P9): antes se volcaba cada línea y el cuerpo
+                    // completo a logcat; AHORA no (podría ser información sensible).
                     acumulador.append(linea);
                 }
                 Log.d("clienterestandroid", "FIN leyendo cuerpo");
 
                 this.cuerpoRespuesta = acumulador.toString();
-                Log.d("clienterestandroid", "cuerpo recibido=" + this.cuerpoRespuesta);
-
-                connection.disconnect();
-
-            } catch (IOException ex) {
-                // dispara excepcin cuando la respuesta REST no tiene cuerpo y yo intento getInputStream()
-                Log.d("clienterestandroid", "doInBackground() : parece que no hay cuerpo en la respuesta");
             }
 
             return true; // doInBackground() termina bien
 
+        } catch (IOException ex) {
+            // excepción al conectar, enviar o leer (p.ej. respuesta sin cuerpo)
+            Log.d("clienterestandroid", "doInBackground(): problema de entrada/salida: " + ex.getMessage());
+            return false; // ANTES->DESPUÉS (P5): ya no devuelvo true cuando falla la lectura
         } catch (Exception ex) {
             Log.d("clienterestandroid", "doInBackground(): ocurrio alguna otra excepcion: " + ex.getMessage());
-        }
-
-        return false; // doInBackground() NO termina bien
+            return false;
+        } finally {
+            // ANTES->DESPUÉS (P6): antes connection.disconnect() solo se ejecutaba si
+            // la lectura terminaba bien; AHORA se libera la conexión SIEMPRE.
+            if ( connection != null ) {
+                connection.disconnect();
+            } // if
+        } // try-finally
     } // ()
 
     // --------------------------------------------------------------------
@@ -145,9 +175,12 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
     protected void onPostExecute(Boolean comoFue) {
         // llamado tras doInBackground()
         Log.d("clienterestandroid", "onPostExecute() comoFue = " + comoFue);
-        this.laRespuesta.callback(this.codigoRespuesta, this.cuerpoRespuesta);
+
+        // ANTES->DESPUÉS (P4): antes se llamaba a callback sin comprobar null,
+        // con laRespuesta = null daba NullPointerException.
+        if ( this.laRespuesta != null ) {
+            this.laRespuesta.callback(this.codigoRespuesta, this.cuerpoRespuesta);
+        } // if
     }
 
 } // class
-
-

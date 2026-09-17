@@ -104,9 +104,39 @@ public class TramaIBeacon {
     }
 
     // -------------------------------------------------------------------------------
+    // esIBeacon()->B ->Clase(Consultar)
+    //
+    // ANTES->DESPUÉS: no existía este método (aunque el comentario de clase
+    //        decía que sí) y cada anuncio se interpretaba como iBeacon.
+    // MOTIVO: un iBeacon de Apple de verdad debe llevar companyID 0x004C,
+    //         tipo 0x02 y longitud 0x15; si no, los campos son falsos.
+    // -------------------------------------------------------------------------------
+    public boolean esIBeacon() {
+        if ( companyID == null || companyID.length < 2 ) {
+            return false;
+        }
+
+        int id = ( (companyID[0] & 0xFF) << 8 ) | ( companyID[1] & 0xFF );
+
+        return      id == 0x004C
+                && ( iBeaconType & 0xFF ) == 0x02
+                && ( iBeaconLength & 0xFF ) == 0x15;
+    } // ()
+
+    // -------------------------------------------------------------------------------
     // bytes:[byte]->TramaIBeacon()->Clase(Modificar)
+    //
+    // ANTES->DESPUÉS: el constructor no validaba la longitud (el comentario
+    //        decía que sí) y accedía directamente a losBytes[29].
+    // MOTIVO: un anuncio BLE con menos de 30 bytes provocaba un
+    //         ArrayIndexOutOfBoundsException (los bytes vienen de otros
+    //         dispositivos y no se pueden controlar).
     // -------------------------------------------------------------------------------
     public TramaIBeacon(byte[] bytes ) {
+        if ( bytes == null || bytes.length < 30 ) {
+            throw new IllegalArgumentException( "Trama iBeacon demasiado corta" );
+        }
+
         this.losBytes = bytes;
 
         prefijo = Arrays.copyOfRange(losBytes, 0, 8+1 ); // 9 bytes
