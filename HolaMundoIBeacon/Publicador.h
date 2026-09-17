@@ -27,34 +27,26 @@ class Publicador {
 private:
 //Mensaje que se envia
 // ******************************************
-// ******************************************
 //  SE MODIFICA: el UUID del beacon (16 bytes = 16 caracteres)
 //  La app lo muestra en logcat como "uuid = EPSG-GTI-PROY-3A"
-// ******************************************
 // ******************************************
   uint8_t beaconUUID[16] = { 
 	'E', 'P', 'S', 'G', '-', 'G', 'T', 'I', 
 	'-', 'P', 'R', 'O', 'Y', '-', '3', 'A'
 	};
-
   // ............................................................
   // ............................................................
 public:
 //Beacon que se envía.
 // ******************************************
-// ******************************************
+// 
 //  SE MODIFICA: los datos de identificación de la emisora
-//    "GTI-3A"   -> nombre que la app usa para filtrar (el del archivo
-//                  .ino aparece como dispositivoBuscado, p.ej. "fistro")
-//    0x004c     -> fabricanteID (NO tocar: es Apple, los iBeacon lo exigen)
-//    4          -> txPower (potencia de transmisión en dBm)
-//  La app también usa RSSI (más abajo) para el campo rssi del anuncio.
-// ******************************************
+// 
 // ******************************************
   EmisoraBLE laEmisora {
-	"GTI-3A", //  nombre emisora
-	  0x004c, // fabricanteID (Apple)
-	  4 // txPower
+	"GTI-3A", // nombre que la app usa para filtrar
+	  0x004c, // fabricanteID (NO tocar: es Apple, los iBeacon lo exigen)
+	  4 // 			 txPower (potencia de transmisión en dBm)
 	  };
   
   const int RSSI = -53; // por poner algo, de momento no lo uso
@@ -72,6 +64,7 @@ public:
   };
 
   // ............................................................
+	// Publicador()
   // ............................................................
   Publicador( ) {
 	// ATENCION: no hacerlo aquí. (*this).laEmisora.encenderEmisora();
@@ -79,14 +72,17 @@ public:
   } // ()
 
   // ............................................................
+	// encenderEmisora()<-Clase(Consulta)
   // ............................................................
   void encenderEmisora() {
 	(*this).laEmisora.encenderEmisora();
   } // ()
 
   // ............................................................
+	// valorCO2:N(Antes era Z), contador:N, tiempoEspera:N->publicarCO2()<- Clase(Consulta)
+	//																																	 ->Clase(Modificar)
   // ............................................................
-  void publicarCO2( int16_t valorCO2, uint8_t contador,
+  void publicarCO2( uint16_t valorCO2, uint8_t contador,
 					long tiempoEspera ) {
 
 	//
@@ -128,6 +124,8 @@ public:
   } // ()
 
   // ............................................................
+	// valorTemperatura:Z, contador:N, tiempoEspera:N->publicarTemperatura()<- Clase(Consulta)
+	//																																	    ->Clase(Modificar)
   // ............................................................
   void publicarTemperatura( int16_t valorTemperatura,
 							uint8_t contador, long tiempoEspera ) {
