@@ -10,11 +10,17 @@
 #define PUERTO_SERIE_H_INCLUIDO
 
 // ----------------------------------------------------------
+// class PuertoSerie
+//  Encapsula el puerto serie del Arduino/Bluefruit:
+//   - el constructor arranca Serial a la velocidad (baudios) indicada
+//   - esperarDisponible() bloquea hasta que el puerto está listo
+//   - escribir(...) manda un mensaje por el puerto (para logs)
 // ----------------------------------------------------------
 class PuertoSerie  {
 
 public:
   // .........................................................
+  // baudios:N->PuertoSerie()->Clase(Modificar)
   // .........................................................
   PuertoSerie (long baudios) {
 	Serial.begin( baudios );
@@ -22,6 +28,7 @@ public:
   } // ()
 
   // .........................................................
+  // esperarDisponible()
   // .........................................................
   void esperarDisponible() {
 
@@ -32,8 +39,9 @@ public:
   } // ()
 
   // .........................................................
+  // mensaje:cualquier tipo->escribir()
   // .........................................................
-  template<typename T>
+  template<typename T> //Una función que puede recibir un tipo de dato cualquiera. A ese tipo lo voy a llamar T."
   void escribir (T mensaje) {
 	Serial.print( mensaje );
   } // ()

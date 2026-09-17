@@ -3,8 +3,13 @@
 #ifndef MEDIDOR_H_INCLUIDO
 #define MEDIDOR_H_INCLUIDO
 
-// ------------------------------------------------------
-// ------------------------------------------------------
+// ----------------------------------------------------------
+// class Medidor
+// Es el "sensor" de la placa:
+//   medirCO2() y medirTemperatura() devuelven las lecturas.
+//   De momento devuelve valores SIMULADOS fijos:aqui se cambian
+//   
+// ----------------------------------------------------------
 class Medidor {
 
   // .....................................................
@@ -14,24 +19,27 @@ private:
 public:
 
   // .....................................................
-  // constructor
+  // constructor Medidor()
   // .....................................................
   Medidor(  ) {
   } // ()
 
   // .....................................................
+  // iniciarMedidor()
   // .....................................................
   void iniciarMedidor() {
 	// las cosas que no se puedan hacer en el constructor, if any
   } // ()
 
   // .....................................................
+  // medirCO2()->N
   // .....................................................
   int medirCO2() {
-	return 235;
+	return 1234;
   } // ()
 
   // .....................................................
+  // medirTemperatura()->Z
   // .....................................................
   int medirTemperatura() {
 	return -12; // qué frío !

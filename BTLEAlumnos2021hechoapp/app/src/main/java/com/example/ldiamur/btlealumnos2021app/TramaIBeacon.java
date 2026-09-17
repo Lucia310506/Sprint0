@@ -4,7 +4,12 @@ package com.example.ldiamur.btlealumnos2021app;
 import java.util.Arrays;
 
 // -----------------------------------------------------------------------------------
-// @author: Jordi Bataller i Mascarell
+// class TramaIBeacon
+//Parsea los bytes de un anuncio BLE y extrae los campos de un
+//   iBeacon: prefijo (9 bytes), uuid (16), major (2), minor (2) y txPower (1).
+//   - El constructor valida que la trama tenga al menos 30 bytes (si no, no parsea).
+//   - esIBeacon() dice si el anuncio es un iBeacon de verdad de Apple
+//     (companyID 0x004C, tipo 0x02, longitud 0x15).
 // -----------------------------------------------------------------------------------
 public class TramaIBeacon {
     private byte[] prefijo = null; // 9 bytes
@@ -22,74 +27,123 @@ public class TramaIBeacon {
     private byte iBeaconLength = 0 ; // 1 byte
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getPrefijo()<- Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getPrefijo() {
         return prefijo;
     }
 
     // -------------------------------------------------------------------------------
+    // UUID<-getUUID()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getUUID() {
         return uuid;
     }
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getMajor()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getMajor() {
         return major;
     }
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getMinor()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getMinor() {
         return minor;
     }
 
     // -------------------------------------------------------------------------------
+    //byte<-getTxPower()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte getTxPower() {
         return txPower;
     }
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getLosBytes()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getLosBytes() {
         return losBytes;
     }
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getAdvFlags()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getAdvFlags() {
         return advFlags;
     }
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getAdvHeader()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getAdvHeader() {
         return advHeader;
     }
 
     // -------------------------------------------------------------------------------
+    //[byte]<-getCompanyID()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte[] getCompanyID() {
         return companyID;
     }
 
     // -------------------------------------------------------------------------------
+    //byte<-getiBeaconType()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte getiBeaconType() {
         return iBeaconType;
     }
 
     // -------------------------------------------------------------------------------
+    //byte<-getiBeaconLength()<-Clase(Consultar)
     // -------------------------------------------------------------------------------
     public byte getiBeaconLength() {
         return iBeaconLength;
     }
 
     // -------------------------------------------------------------------------------
+    // esIBeacon()->B ->Clase(Consultar)
+    //
+    // ANTES->DESPUÉS: no existía este método (aunque el comentario de clase
+    //        decía que sí) y cada anuncio se interpretaba como iBeacon.
+    // MOTIVO: un iBeacon de Apple de verdad debe llevar companyID 0x004C,
+    //         tipo 0x02 y longitud 0x15; si no, los campos son falsos.
+    // -------------------------------------------------------------------------------
+    public boolean esIBeacon() {
+        if ( companyID == null || companyID.length < 2 ) {
+            return false;
+        }
+
+        // ANTES->DESPUÉS: aquí se juntaban los 2 bytes en big-endian
+        //        (((companyID[0]) << 8) | companyID[1]), con lo que {0x4C,0x00}
+        //        daba 0x4C00 y nunca coincidía con 0x004C: TODO iBeacon de verdad
+        //        se descartaba (esIBeacon() siempre false).
+        // MOTIVO: el campo companyID de un anuncio BLE va en little-endian, así
+        //         que {0x4C,0x00} son 0x004C. Se lee al revés para obtener el
+        //         identificador real de 16 bits.
+        int id = ( (companyID[1] & 0xFF) << 8 ) | ( companyID[0] & 0xFF );
+
+        return      id == 0x004C
+                && ( iBeaconType & 0xFF ) == 0x02
+                && ( iBeaconLength & 0xFF ) == 0x15;
+    } // ()
+
+    // -------------------------------------------------------------------------------
+    // bytes:[byte]->TramaIBeacon()->Clase(Modificar)
+    //
+    // ANTES->DESPUÉS: el constructor no validaba la longitud (el comentario
+    //        decía que sí) y accedía directamente a losBytes[29].
+    // MOTIVO: un anuncio BLE con menos de 30 bytes provocaba un
+    //         ArrayIndexOutOfBoundsException (los bytes vienen de otros
+    //         dispositivos y no se pueden controlar).
     // -------------------------------------------------------------------------------
     public TramaIBeacon(byte[] bytes ) {
+        if ( bytes == null || bytes.length < 30 ) {
+            throw new IllegalArgumentException( "Trama iBeacon demasiado corta" );
+        }
+
         this.losBytes = bytes;
 
         prefijo = Arrays.copyOfRange(losBytes, 0, 8+1 ); // 9 bytes

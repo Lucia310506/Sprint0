@@ -15,6 +15,12 @@ void esperar (long tiempo) {
 }
 
 // ----------------------------------------------------------
+// class LED 
+// Controla el LED de la placa:
+//   encender()/apagar() prueban el LED,
+//   alternar() cambia su estado,
+//   brillar(tiempo) lo enciende, espera y lo apaga.
+// esperar(tiempo) es una utilidad que llama a delay().
 // ----------------------------------------------------------
 class LED {
 private:
@@ -23,8 +29,9 @@ private:
 public:
 
   // .........................................................
+  // numero:N(Antes era Z)->Led()->CLase(Modifica)
   // .........................................................
-  LED (int numero)
+  LED (uint numero)
 	: numeroLED (numero), encendido(false)
   {
 	pinMode(numeroLED, OUTPUT);
@@ -32,6 +39,7 @@ public:
   }
 
   // .........................................................
+  // encender()->clase (Modifica)
   // .........................................................
   void encender () {
 	digitalWrite(numeroLED, HIGH); 
@@ -39,6 +47,7 @@ public:
   }
 
   // .........................................................
+  // apagar()->clase(Modifica)
   // .........................................................
   void apagar () {
 	  digitalWrite(numeroLED, LOW);
@@ -46,6 +55,8 @@ public:
   }
 
   // .........................................................
+  // alternar()-> Clase(Modifica)
+  //           <- Clase (Consulta)
   // .........................................................
   void alternar () {
 	if (encendido) {
@@ -56,6 +67,7 @@ public:
   } // ()
 
   // .........................................................
+  // tiempo ->brillar()->Clase(Modifica)
   // .........................................................
   void brillar (long tiempo) {
 	encender ();

@@ -40,6 +40,12 @@ namespace Globales {
 #include "Publicador.h"
 #include "Medidor.h"
 
+// --------------------------------------------------------------
+// Autocomprobación al encender (power-on self test).
+// Se ejecuta en setup() y escribe [OK]/[FALLO] por el puerto serie.
+// --------------------------------------------------------------
+#include "AutoTests.h"
+
 
 // --------------------------------------------------------------
 // --------------------------------------------------------------
@@ -52,6 +58,7 @@ namespace Globales {
 }; // namespace
 
 // --------------------------------------------------------------
+//                  inicializarPlaquita ()
 // --------------------------------------------------------------
 void inicializarPlaquita () {
 
@@ -83,6 +90,13 @@ void setup() {
   Globales::elPublicador.encenderEmisora();
 
   // Globales::elPublicador.laEmisora.pruebaEmision();
+  
+  // ------------------------------------------------------------ // 
+  //                          AUTO-TESTS 
+  // ------------------------------------------------------------ //
+  // Pruebas automáticas al encender: escriben [OK]/[FALLO] por Serie.
+  // Los resultados se ven en el Monitor Serie (115200 baudios).
+  AutoTests::ejecutarAutoTests();
   
   // ------------------------------------------------------------ // 
   //                          MEDIDOR 
@@ -134,8 +148,7 @@ void loop () {
   elPuerto.escribir( cont );
   elPuerto.escribir( "\n" );
 
-
-  lucecitas(); 
+  lucecitas(); //Se hace para saber que el código esta funcionando
 
   // 
   // mido y publico

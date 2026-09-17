@@ -23,7 +23,10 @@ diHola( function( err, res ) {
    return
   }
 
-  document.getElementById("salida").innerHTML = res.nombre + " dice: "
+  // ANTES->DESPUÉS (B8/V8): se usaba innerHTML con datos del servidor →
+  //        XSS potencial si el nombre contuviera HTML/JavaScript.
+  //        MOTIVO: textContent trata el texto como texto simple.
+  document.getElementById("salida").textContent = res.nombre + " dice: "
   + res.saludo;
 })
 
@@ -40,13 +43,15 @@ var password = document.getElementById("password").value
 // llamo a la función de la lógica (versión fake)
 hacerLogin( nombre, password, function( res ) {
   // cuando tenga el resultado lo muestro
-  document.getElementById("salida").innerHTML = " login= " + res.resultado;
+  document.getElementById("salida").textContent = " login= " + (res.resultado || false);
 
   // si el login es correcto
   if ( res.resultado == true ) {
     alert(" login ok " )
   } else {
-    alert(" fallo en login (el password es: 1234)" )
+    // ANTES->DESPUÉS (B7): el alert revelaba la contraseña ("el password es: 1234").
+    //        MOTIVO: nunca hay que enseñar credenciales en la interfaz.
+    alert(" fallo en login" )
   }
 })
 

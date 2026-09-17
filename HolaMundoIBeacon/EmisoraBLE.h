@@ -21,6 +21,14 @@
 #include "ServicioEnEmisora.h"
 
 // ----------------------------------------------------------
+// class EmisoraBLE
+// Envuelve la emisora BLE de la placa (Bluefruit):
+//   - encenderEmisora() inicializa Bluetooth
+//   - emitirAnuncioIBeacon() emite un anuncio iBeacon con uuid, major,
+//     minor y rssi dados (es el método que usa Publicador)
+//   - detenerAnuncio() / estaAnunciando() controlan la emisión
+//   - anyadirServicio...() sirve si además quieres un servicio GATT
+//   - en el constructor se fija el nombre, fabricante y txPower
 // ----------------------------------------------------------
 class EmisoraBLE {
 private:
@@ -32,12 +40,14 @@ private:
 public:
 
   // .........................................................
+
   // .........................................................
   using CallbackConexionEstablecida = void ( uint16_t connHandle ); // Es una función que establece conexión
   using CallbackConexionTerminada = void ( uint16_t connHandle, uint8_t reason); // Es una función que establece conexión
 
   // .........................................................
 	//											CONSTRUCTOR
+	//nombreEmisora_:texto, fabricanteID_:N,txPower:Z->EmisoraBLE()->Clase(Modificar)
   // .........................................................
   EmisoraBLE( const char * nombreEmisora_, const uint16_t fabricanteID_,
 			  const int8_t txPower_ ) 
@@ -72,6 +82,7 @@ public:
   */
 	
   // .........................................................
+	// encenderEmisora()->Clase(Modificar)
   // .........................................................
   void encenderEmisora() {
 	// Serial.println ( "Bluefruit.begin() " );
@@ -83,6 +94,7 @@ public:
   } // ()
 
   // .........................................................
+	// cbce:CallbackConexionEstablecida ,cbct:CallbackConexionTerminada->encenderEmisora()
   // .........................................................
   void encenderEmisora( CallbackConexionEstablecida cbce,
 						CallbackConexionTerminada cbct ) {
@@ -95,6 +107,7 @@ public:
   } // ()
 
   // .........................................................
+	// detenerAnuncio()<-Clase(Consultar)
   // .........................................................
   void detenerAnuncio() {
 
@@ -113,8 +126,14 @@ public:
   } // ()
 
   // .........................................................
+	// beaconUUID:N, major:Z, minor:Z, rssi:Z ->emitirAnuncioIBeacon()<-Clase(Consultar)
+	//																																->Clase(Modificar)
+	//
+	// ANTES->DESPUÉS: rssi era uint8_t y es int8_t.
+	// MOTIVO: el txPower del iBeacon es un byte CON SIGNO; con uint8_t, -53
+	//         se convertía a 203 y se perdía el signo (la app lo lee como 0xCB=-53).
   // .........................................................
-  void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, uint8_t rssi ) {
+  void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, int8_t rssi ) {
 
 	//
 	//
@@ -126,6 +145,10 @@ public:
 	//
 	BLEBeacon elBeacon( beaconUUID, major, minor, rssi );
 	// Indica el fabricante del iBeacon.
+	// ANTES->DESPUÉS: sin cambio de código, solo documentación.
+	// MOTIVO: 0x004C (Apple) es obligatorio y el estándar iBeacon NO lleva
+	//         firma ni autenticación: un beacon con el mismo UUID se puede
+	//         suplantar (riesgo P7/P16 aceptado).
 	elBeacon.setManufacturer( (*this).fabricanteID );
 
 	//
@@ -203,8 +226,12 @@ public:
   void emitirAnuncioIBeaconLibre( const char * carga ) {
 
 	const uint8_t tamanyoCarga = strlen( carga );
+	//.........................................................
+	// carga:texto, tamanyoCarga:N->emitirAnuncioIBeaconLibre()->Clase(Modificar)
+	//																												 <-Clase(Consultar)
+	//.........................................................
   */
-  void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
+void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
 
 	(*this).detenerAnuncio(); 
 
@@ -218,7 +245,7 @@ public:
 	Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE); //"Este dispositivo utiliza Bluetooth Low Energy y es descubrible".
 
 	// con este parece que no va  !
-	// Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE);
+	// Bluefruit.Advertising.addFlag(BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE);
 
 	//
 	// hasta ahora habrá, supongo, ya puestos los 5 primeros bytes. Efectivamente.
@@ -240,6 +267,19 @@ public:
 	// addData() hay que usarlo sólo una vez. Por eso copio la carga
 	// en el anterior array, donde he dejado 21 sitios libres
 	//
+	// ANTES->DESPUÉS: se añade un guard que evita copiar si no hay carga.
+	// MOTIVO: si carga es nullptr o tamanyoCarga == 0, el memcpy anterior
+	//         podía leer de memoria no reservada y emitir basura.
+	//
+	if ( carga == nullptr || tamanyoCarga == 0 ) {
+	  // nada que copiar: emito el prefijo y el resto '-' por defecto
+	  Bluefruit.Advertising.addData( BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+									 &restoPrefijoYCarga[0],
+									 4+21 ); //Añadimos nuestros datos al Advertising, de que es manufacturer
+	  Globales::elPuerto.escribir( "emitiriBeacon libre SIN carga (puntero nulo o tamaño 0)  \n");
+	  return;
+	} // if
+
 	// memcpy(destino, origen, cantidad);
 	memcpy( &restoPrefijoYCarga[4], &carga[0], ( tamanyoCarga > 21 ? 21 : tamanyoCarga ) ); //memcpy() COPIA bytes de una zona de memoria a otra.
 
@@ -267,6 +307,7 @@ public:
   } // ()
 
   // .........................................................
+	// servicio:ServicioEnEmisora->anyadirServicio()->B
   // .........................................................
   bool anyadirServicio( ServicioEnEmisora & servicio ) {
 
@@ -286,6 +327,7 @@ public:
 
   
   // .........................................................
+	// servicio:ServicioEnEmisora->anyadirServicioConSusCaracteristicas()->B
   // .........................................................
 	// Añade un servicio a la emisora cuando no hay características que añadir.
   bool anyadirServicioConSusCaracteristicas( ServicioEnEmisora & servicio ) { 
@@ -293,6 +335,9 @@ public:
   } // 
 
   // .........................................................
+	//servicio:ServicioEnEmisora, restoCaracteristicas:cualquier tipo ->anyadirServicioConSusCaracteristicas()->B
+	//caracteristica:ServicioEnEmisora::Caracteristica,
+	//.........................................................
   template <typename ... T>
   bool anyadirServicioConSusCaracteristicas( ServicioEnEmisora & servicio,
 											 ServicioEnEmisora::Caracteristica & caracteristica,
@@ -305,6 +350,8 @@ public:
   } // ()
 
   // .........................................................
+	//servicio:ServicioEnEmisora, restoCaracteristicas:cualquier tipo ->anyadirServicioConSusCaracteristicasYActivar()->B
+  //.........................................................
   template <typename ... T>
   bool anyadirServicioConSusCaracteristicasYActivar( ServicioEnEmisora & servicio,
 													 // ServicioEnEmisora::Caracteristica & caracteristica,
@@ -319,6 +366,7 @@ public:
   } // ()
 
   // .........................................................
+	// cb:CallbackConexionEstablecida->instalarCallbackConexionEstablecida()
   // .........................................................
 	// Registra la función que se ejecutará cuando se establezca una conexión.
   void instalarCallbackConexionEstablecida( CallbackConexionEstablecida cb ) {
@@ -326,6 +374,7 @@ public:
   } // ()
 
   // .........................................................
+	// cb:CallbackConexionTerminada-> instalarCallbackConexionTerminada()
   // .........................................................
 	// Registra la función que se ejecutará cuando termine una conexión.
   void instalarCallbackConexionTerminada( CallbackConexionTerminada cb ) {
@@ -333,6 +382,7 @@ public:
   } // ()
 
   // .........................................................
+	// connHandle:N->getConexion()->BLEConnection
   // .........................................................
   BLEConnection * getConexion( uint16_t connHandle ) {
 	return Bluefruit.Connection( connHandle );

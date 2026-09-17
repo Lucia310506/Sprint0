@@ -9,11 +9,18 @@
 
 // ----------------------------------------------------
 // ----------------------------------------------------
-#include <vector>
+// **************************************************
+//  ANTES->DESPUÉS: se quita #include <vector> y std::vector.
+//  MOTIVO: el toolchain de la placa no enlaza la STL completa
+//          (fallo del linker: std::__throw_length_error). Se
+//          sustituye por un array fijo (máx. 4 características).
+// **************************************************
+#define MAX_CARACTERISTICAS 4
 
 // ----------------------------------------------------
 // alReves() utilidad
 // pone al revés el contenido de una array en el mismo array
+// T:[cualquier tipo], n:Z ->alReves()->[cualquier tipo]
 // ----------------------------------------------------
 template< typename T >
 T *  alReves( T * p, int n ) {
@@ -28,20 +35,43 @@ T *  alReves( T * p, int n ) {
 } // ()
 
 // ----------------------------------------------------
+// pString:texto, pUint:[N], ->stringAUint8AlReves()->[N]
+// tamMax:Z(Ahora N, no puede haber tamaños negativos)
+//
+// ANTES->DESPUÉS: se añaden null-check y tope de longitud sin depender de '\0'.
+// MOTIVO: si pString/pUint valen nullptr o el string no llega a terminar en
+//         '\0', strlen() podía leer fuera de la zona reservada y provocar un
+//         fallo/crash.
 // ----------------------------------------------------
-uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, int tamMax ) {
+uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, uint tamMax ) {
+  if ( pString == nullptr || pUint == nullptr ) {
+    return nullptr; // no hay dónde copiar ni desde qué copiar
+  }
 
-	int longitudString =  strlen( pString );
-	int longitudCopiar = ( longitudString > tamMax ? tamMax : longitudString );
-	// copio nombreServicio -> uuidServicio pero al revés
-	for( int i=0; i<=longitudCopiar-1; i++ ) {
-	  pUint[ tamMax-i-1 ] = pString[ i ];
-	} // for
+  int longitudString = 0;
+  // longitud real sin pasarnos de lo que cabe en el destino (tamMax)
+  while ( pString[ longitudString ] != '\0' &&  longitudString < (int) tamMax ) {
+    longitudString++;
+  } // while
 
-	return pUint;
+  int longitudCopiar = ( longitudString > (int) tamMax ? (int) tamMax : longitudString );
+  // copio nombreServicio -> uuidServicio pero al revés
+  for( int i=0; i<=longitudCopiar-1; i++ ) {
+    pUint[ tamMax-i-1 ] = pString[ i ];
+  } // for
+
+  return pUint;
 } // ()
 
 // ----------------------------------------------------------
+// class ServicioEnEmisora (y su clase anidada Caracteristica)
+// Representa un servicio BLE en la emisora:
+//   un servicio agrupa características que el teléfono puede leer/escribir.
+//   - Caracteristica: define una característica (uuid, propiedades
+//     read/write/notify, permisos) y permite escribir/notificar datos o
+//     instalar un callback cuando el móvil la escriba.
+//   - ServicioEnEmisora: agrupa varias Caracteristica y las activa en la
+//     emisora cuando se llama a activarServicio().
 // ----------------------------------------------------------
 class ServicioEnEmisora {
 
@@ -52,6 +82,7 @@ public:
   // --------------------------------------------------------
 
   // .........................................................
+	//conn_handle:N, chr:BLECharacteristic, data:[N], len:N->CallbackCaracteristicaEscrita()
   // .........................................................
   using CallbackCaracteristicaEscrita = void ( uint16_t conn_handle,
 											   BLECharacteristic * chr,
@@ -76,6 +107,7 @@ public:
   public:
 
 	// .........................................................
+	// nombreCaracteristica_:texto->Caracteristica()->Clase(Modificar)
 	// .........................................................
 	Caracteristica( const char * nombreCaracteristica_ )
 	  :
@@ -85,6 +117,9 @@ public:
 	} // ()
 
 	// .........................................................
+	//nombreCaracteristica_:texto, props:N,
+	// permisoRead:SecureMode_t, permisoWrite:SecureMode_t->Caracteristica()->Clase(Modificar)
+	// tam:N
 	// .........................................................
 	Caracteristica( const char * nombreCaracteristica_ ,
 					uint8_t props,
@@ -100,6 +135,7 @@ public:
   private:
 	// .........................................................
 	// CHR_PROPS_WRITE , CHR_PROPS_READ ,  CHR_PROPS_NOTIFY 
+	//props:N->asignarPropiedades()->Clase(Modificar)
 	// .........................................................
 	void asignarPropiedades ( uint8_t props ) {
 	  // no puedo escribir AUN si el constructor llama a esto: Serial.println( " laCaracteristica.setProperties( props ); ");
@@ -108,6 +144,7 @@ public:
 
 	// .........................................................
 	// BleSecurityMode::SECMODE_OPEN  , BleSecurityMode::SECMODE_NO_ACCESS
+	//permisoRead:SecureMode_t, permisoWrite:SecureMode_t->asignarPermisos()->Clase(Modificar)
 	// .........................................................
 	void asignarPermisos( SecureMode_t  permisoRead, SecureMode_t  permisoWrite ) {
 	  // no puedo escribir AUN si el constructor llama a esto: Serial.println( "laCaracteristica.setPermission( permisoRead, permisoWrite ); " );
@@ -115,6 +152,7 @@ public:
 	} // ()
 
 	// .........................................................
+	// tam:N->asignarTamanyoDatos()->Clase(Modificar)
 	// .........................................................
 	void asignarTamanyoDatos( uint8_t tam ) {
 	  // no puedo escribir AUN si el constructor llama a esto: Serial.print( " (*this).laCaracteristica.setFixedLen( tam = " );
@@ -125,6 +163,8 @@ public:
 
   public:
 	// .........................................................
+	// props:N, permisoRead:SecureMode_t,->asignarPropiedadesPermisosYTamanyoDatos()->Clase(Modificar)
+	// permisoWrite:SecureMode_t, tam:N
 	// .........................................................
 	void asignarPropiedadesPermisosYTamanyoDatos( uint8_t props,
 												 SecureMode_t  permisoRead,
@@ -137,6 +177,8 @@ public:
 												 
 
 	// .........................................................
+	//str:texto->escribirDatos()->N
+	//													->Clase(Modificar)
 	// .........................................................
 	uint16_t escribirDatos( const char * str ) {
 	  // Serial.print( " return (*this).laCaracteristica.write( str  = " );
@@ -150,6 +192,8 @@ public:
 	} // ()
 
 	// .........................................................
+	//str:texto->notificarDatos()->N
+	//													 ->Clase(Modificar)
 	// .........................................................
 	uint16_t notificarDatos( const char * str ) {
 	  
@@ -159,17 +203,25 @@ public:
 	} //  ()
 
 	// .........................................................
+	// cb:CallbackCaracteristicaEscrita-> instalarCallbackCaracteristicaEscrita()->Clase(Modificar)
 	// .........................................................
 	void instalarCallbackCaracteristicaEscrita( CallbackCaracteristicaEscrita cb ) {
 	  (*this).laCaracteristica.setWriteCallback( cb );
 	} // ()
 
 	// .........................................................
+	// activar()->Clase(Modificar)
+	//
+	// ANTES->DESPUÉS: activar() devolvía void y ahora devuelve bool.
+	// MOTIVO: si laCaracteristica.begin() falla, que el resto del programa
+	//         lo sepa y no actúe como si la característica estuviera activa.
 	// .........................................................
-	void activar() {
+	bool activar() {
 	  err_t error = (*this).laCaracteristica.begin();
 	  Globales::elPuerto.escribir(  " (*this).laCaracteristica.begin(); error = " );
 	  Globales::elPuerto.escribir(  error );
+
+	  return ( error == 0 ); // 0 = ERROR_NONE; false si falló
 	} // ()
 
   }; // class Caracteristica
@@ -194,11 +246,15 @@ private:
   //
   //
   //
-  std::vector< Caracteristica * > lasCaracteristicas;
+  // ANTES->DESPUÉS: era std::vector<Caracteristica*> y ahora un array fijo.
+  // MOTIVO: evitar la STL (no enlaza en la placa) y no reservar memoria dinámica.
+  Caracteristica * lasCaracteristicas[ MAX_CARACTERISTICAS ] = { nullptr };
+  int numCaracteristicas = 0;
 
 public:
   
   // .........................................................
+	// nombreServicio_:texto->ServicioEnEmisora()->Clase(Modificar)
   // .........................................................
   ServicioEnEmisora( const char * nombreServicio_ )
 	:
@@ -208,6 +264,7 @@ public:
   } // ()
   
   // .........................................................
+	//  escribeUUID()<-Clase(Consultar)
   // .........................................................
   void escribeUUID() {
 	Serial.println ( "**********" );
@@ -218,14 +275,26 @@ public:
   } // ()
 
   // .........................................................
+	//car:Caracteristica->anyadirCaracteristica()->Clase(Modificar)
   // .........................................................
   void anyadirCaracteristica( Caracteristica & car ) {
-	(*this).lasCaracteristicas.push_back( & car );
+	// ANTES->DESPUÉS: era push_back() del vector, ahora guardo el puntero
+	// en el array (con tope para no salirme).
+	if ( (*this).numCaracteristicas < MAX_CARACTERISTICAS ) {
+	  (*this).lasCaracteristicas[ (*this).numCaracteristicas ] = & car;
+	  (*this).numCaracteristicas++;
+	} // if
   } // ()
 
   // .........................................................
-  // .........................................................
-  void activarServicio( ) {
+	// BLEService <-activarServicio()<-Clase(Consultar)
+	//
+	// ANTES->DESPUÉS: activarServicio() devolvía void y ahora bool, y aborta
+	//         si el servicio no arrancó.
+	// MOTIVO: si elServicio.begin() falla no tiene sentido activar
+	//         sus características.
+	// .........................................................
+	bool activarServicio( ) {
 	// entiendo que al llegar aquí ya ha sido configurado
 	// todo: características y servicio
 
@@ -233,13 +302,22 @@ public:
 	Serial.print( " (*this).elServicio.begin(); error = " );
 	Serial.println( error );
 
-	for( auto pCar : (*this).lasCaracteristicas ) {
-	  (*pCar).activar();
+	if ( error != 0 ) { // 0 = ERROR_NONE
+	  // no sigo: activar características de un servicio caído no tiene sentido
+	  return false;
+	} // if
+
+	// ANTES->DESPUÉS: era un range-for sobre el vector; ahora recorro el
+	// array hasta numCaracteristicas.
+	for( int i = 0; i < (*this).numCaracteristicas; i++ ) {
+	  (*this).lasCaracteristicas[ i ]->activar();
 	} // for
 
+	return true;
   } // ()
 
   // .........................................................
+	// BleService<-operator BLEService()
   // .........................................................
   operator BLEService&() {
 	// "conversión de tipo": si pongo esta clase en un sitio donde necesitan un BLEService

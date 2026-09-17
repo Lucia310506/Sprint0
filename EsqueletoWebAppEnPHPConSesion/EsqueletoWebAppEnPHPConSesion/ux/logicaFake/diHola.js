@@ -1,3 +1,14 @@
+// -------------------------------------------------------------------
+// ux/logicaFake/diHola.js
+// Lógica "fake" que ejecuta el navegador (JavaScript).
+//   Es el espejo que usa la parte de interfaz (HTML) para no conocer el
+//   lado del servidor: la pantalla llama a diHola(cb) y esta función hace
+//   la llamada remota (AJAX/XMLHttpRequest) al endpoint REST
+//   rest/diHola.php. Cuando llega la respuesta, la entrega mediante
+//   callback(err, resultado).
+//   En un futuro, esta "fake" puede convertirse en la llamada real o
+//   sustituirse por un fetch() moderno.
+// -------------------------------------------------------------------
 // ---------------------------------------------------
 //
 // versión fake de una función de la lógica
@@ -16,11 +27,28 @@ function diHola( cb ) {
 		// callback para cuando llegue la respuesta
 		// de la petición que haremos más abajo
 
-		if( this.readyState == 4 && this.status == 200 ){
-			// este es el texto JSON recibido la llamada a
-			// demo_file.php, pasado a objeto JSON 
+		if( this.readyState == 4 ){
+
+			// ANTES->DESPUÉS (B6): antes solo se atendía status==200; con
+			// 401 (no acreditado) la interfaz se quedaba esperando.
+			// MOTIVO: avisar siempre del fallo vía callback(err).
+			if ( this.status != 200 ){
+				cb( "error HTTP " + this.status, null )
+				return
+			}
+
+			// ANTES->DESPUÉS (B5): JSON.parse() podía lanzar excepción con una
+			// respuesta no JSON (p.ej. un warning de PHP).
+			// MOTIVO: no romper la interfaz ante una respuesta inválida.
+			var resultado
+			try {
+				resultado = JSON.parse( this.responseText )
+			} catch ( e ) {
+				cb( "respuesta JSON inválida", null )
+				return
+			}
+
 			console.log( "recibo: " + this.responseText )
-			var resultado = JSON.parse(this.responseText)
 
 			if ( resultado.error != 0 ) {
 				cb( resultado.error, null )

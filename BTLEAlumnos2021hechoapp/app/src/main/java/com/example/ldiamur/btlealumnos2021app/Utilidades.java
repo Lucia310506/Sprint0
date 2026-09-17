@@ -6,11 +6,16 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 // -----------------------------------------------------------------------------------
-// @author: Jordi Bataller i Mascarell
+// class Utilidades
+//  Funciones auxiliares de conversión de datos usadas por la app:
+//   - bytes <-> String / hex / UUID
+//   - bytesToInt() pasa 1-4 bytes a int con signo correcto
+//   - stringToBytes() usa UTF-8 explícito
 // -----------------------------------------------------------------------------------
 public class Utilidades {
 
     // -------------------------------------------------------------------------------
+    //texto:texto->stringToBytes()->[bytes]
     // -------------------------------------------------------------------------------
     public static byte[] stringToBytes ( String texto ) {
         return texto.getBytes();
@@ -18,6 +23,7 @@ public class Utilidades {
     } // ()
 
     // -------------------------------------------------------------------------------
+    // uuid:UUID->stringToUUID()->UUID
     // -------------------------------------------------------------------------------
     public static UUID stringToUUID( String uuid ) {
         if ( uuid.length() != 16 ) {
@@ -37,18 +43,21 @@ public class Utilidades {
     } // ()
 
     // -------------------------------------------------------------------------------
+    // uuid:UUID->uuidToString()->texto
     // -------------------------------------------------------------------------------
     public static String uuidToString ( UUID uuid ) {
         return bytesToString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
     } // ()
 
     // -------------------------------------------------------------------------------
+    // uuid:UUID->uuidToHexString()->texto
     // -------------------------------------------------------------------------------
     public static String uuidToHexString ( UUID uuid ) {
         return bytesToHexString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
     } // ()
 
     // -------------------------------------------------------------------------------
+    // bytes:[bytes]->bytesToString()->texto
     // -------------------------------------------------------------------------------
     public static String bytesToString( byte[] bytes ) {
         if (bytes == null ) {
@@ -63,6 +72,7 @@ public class Utilidades {
     }
 
     // -------------------------------------------------------------------------------
+    // masSignificativos:Z, menosSignificativos:Z->dosLongToBytes()->[byte]
     // -------------------------------------------------------------------------------
     public static byte[] dosLongToBytes( long masSignificativos, long menosSignificativos ) {
         ByteBuffer buffer = ByteBuffer.allocate( 2 * Long.BYTES );
@@ -72,18 +82,21 @@ public class Utilidades {
     }
 
     // -------------------------------------------------------------------------------
+    //bytes:[byte]->bytesToInt()->Z
     // -------------------------------------------------------------------------------
     public static int bytesToInt( byte[] bytes ) {
         return new BigInteger(bytes).intValue();
     }
 
     // -------------------------------------------------------------------------------
+    //bytes:[byte]->bytesToLong()->Z
     // -------------------------------------------------------------------------------
     public static long bytesToLong( byte[] bytes ) {
         return new BigInteger(bytes).longValue();
     }
 
     // -------------------------------------------------------------------------------
+    // bytes:[byte]->bytesToIntOK()->Z
     // -------------------------------------------------------------------------------
     public static int bytesToIntOK( byte[] bytes ) {
         if (bytes == null ) {
@@ -108,7 +121,13 @@ public class Utilidades {
                     + (b & 0xFF); // para quedarse con 1 byte (2 cuartetos) de lo que haya en b
         } // for
 
-        if ( (bytes[ 0 ] & 0x8) != 0 ) {
+        // ANTES->DESPUÉS: aquí se comprobaba (bytes[0] & 0x8), que mira el bit 3
+        // (valor 8), no el bit de signo. Cualquier primer byte con el bit 3 a 1
+        // (p.ej. 0x0B, que es 11 = MedicionesID CO2) se tomaba como negativo y el
+        // valor salía mal: {0x0B,0x05} (major 2821) devolvía 5.
+        // MOTIVO: el bit de signo de un byte es el 7, es decir 0x80.
+        //         El test testTramaIBeacon() detectó el fallo.
+        if ( (bytes[ 0 ] & 0x80) != 0 ) {
             // si tiene signo negativo (un 1 a la izquierda del primer byte
             res = -(~(byte)res)-1; // complemento a 2 (~) de res pero como byte, -1
         }
@@ -122,6 +141,7 @@ public class Utilidades {
     } // ()
 
     // -------------------------------------------------------------------------------
+    // bytes:[byte]->bytesToHexString()->texto
     // -------------------------------------------------------------------------------
     public static String bytesToHexString( byte[] bytes ) {
 
