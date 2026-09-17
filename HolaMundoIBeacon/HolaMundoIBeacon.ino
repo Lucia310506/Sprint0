@@ -52,6 +52,7 @@ namespace Globales {
 }; // namespace
 
 // --------------------------------------------------------------
+//                  inicializarPlaquita ()
 // --------------------------------------------------------------
 void inicializarPlaquita () {
 
@@ -134,8 +135,7 @@ void loop () {
   elPuerto.escribir( cont );
   elPuerto.escribir( "\n" );
 
-
-  lucecitas(); 
+  lucecitas(); //Se hace para saber que el código esta funcionando
 
   // 
   // mido y publico

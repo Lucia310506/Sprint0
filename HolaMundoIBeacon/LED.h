@@ -29,8 +29,9 @@ private:
 public:
 
   // .........................................................
+  // numero:N(Antes era Z)->Led()->CLase(Modifica)
   // .........................................................
-  LED (int numero)
+  LED (uint numero)
 	: numeroLED (numero), encendido(false)
   {
 	pinMode(numeroLED, OUTPUT);
@@ -38,6 +39,7 @@ public:
   }
 
   // .........................................................
+  // encender()->clase (Modifica)
   // .........................................................
   void encender () {
 	digitalWrite(numeroLED, HIGH); 
@@ -45,6 +47,7 @@ public:
   }
 
   // .........................................................
+  // apagar()->clase(Modifica)
   // .........................................................
   void apagar () {
 	  digitalWrite(numeroLED, LOW);
@@ -52,6 +55,8 @@ public:
   }
 
   // .........................................................
+  // alternar()-> Clase(Modifica)
+  //           <- Clase (Consulta)
   // .........................................................
   void alternar () {
 	if (encendido) {
@@ -62,6 +67,7 @@ public:
   } // ()
 
   // .........................................................
+  // tiempo ->brillar()->Clase(Modifica)
   // .........................................................
   void brillar (long tiempo) {
 	encender ();
