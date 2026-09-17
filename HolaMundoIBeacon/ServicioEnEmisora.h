@@ -14,6 +14,7 @@
 // ----------------------------------------------------
 // alReves() utilidad
 // pone al revés el contenido de una array en el mismo array
+// T:[cualquier tipo], n:Z ->alReves()->[cualquier tipo]
 // ----------------------------------------------------
 template< typename T >
 T *  alReves( T * p, int n ) {
@@ -28,8 +29,10 @@ T *  alReves( T * p, int n ) {
 } // ()
 
 // ----------------------------------------------------
+// pString:texto, pUint:[N], ->stringAUint8AlReves()->[N]
+// tamMax:Z(Ahora N, no puede haber tamaños negativos)
 // ----------------------------------------------------
-uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, int tamMax ) {
+uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, uint tamMax ) {
 
 	int longitudString =  strlen( pString );
 	int longitudCopiar = ( longitudString > tamMax ? tamMax : longitudString );
@@ -60,6 +63,7 @@ public:
   // --------------------------------------------------------
 
   // .........................................................
+	//conn_handle:N, chr:BLECharacteristic, data:[N], len:N->CallbackCaracteristicaEscrita()
   // .........................................................
   using CallbackCaracteristicaEscrita = void ( uint16_t conn_handle,
 											   BLECharacteristic * chr,
@@ -84,6 +88,7 @@ public:
   public:
 
 	// .........................................................
+	// nombreCaracteristica_:texto->Caracteristica()->Clase(Modificar)
 	// .........................................................
 	Caracteristica( const char * nombreCaracteristica_ )
 	  :
@@ -93,6 +98,9 @@ public:
 	} // ()
 
 	// .........................................................
+	//nombreCaracteristica_:texto, props:N,
+	// permisoRead:SecureMode_t, permisoWrite:SecureMode_t->Caracteristica()->Clase(Modificar)
+	// tam:N
 	// .........................................................
 	Caracteristica( const char * nombreCaracteristica_ ,
 					uint8_t props,
@@ -108,6 +116,7 @@ public:
   private:
 	// .........................................................
 	// CHR_PROPS_WRITE , CHR_PROPS_READ ,  CHR_PROPS_NOTIFY 
+	//props:N->asignarPropiedades()->Clase(Modificar)
 	// .........................................................
 	void asignarPropiedades ( uint8_t props ) {
 	  // no puedo escribir AUN si el constructor llama a esto: Serial.println( " laCaracteristica.setProperties( props ); ");
@@ -116,6 +125,7 @@ public:
 
 	// .........................................................
 	// BleSecurityMode::SECMODE_OPEN  , BleSecurityMode::SECMODE_NO_ACCESS
+	//permisoRead:SecureMode_t, permisoWrite:SecureMode_t->asignarPermisos()->Clase(Modificar)
 	// .........................................................
 	void asignarPermisos( SecureMode_t  permisoRead, SecureMode_t  permisoWrite ) {
 	  // no puedo escribir AUN si el constructor llama a esto: Serial.println( "laCaracteristica.setPermission( permisoRead, permisoWrite ); " );
@@ -123,6 +133,7 @@ public:
 	} // ()
 
 	// .........................................................
+	// tam:N->asignarTamanyoDatos()->Clase(Modificar)
 	// .........................................................
 	void asignarTamanyoDatos( uint8_t tam ) {
 	  // no puedo escribir AUN si el constructor llama a esto: Serial.print( " (*this).laCaracteristica.setFixedLen( tam = " );
@@ -133,6 +144,8 @@ public:
 
   public:
 	// .........................................................
+	// props:N, permisoRead:SecureMode_t,->asignarPropiedadesPermisosYTamanyoDatos()->Clase(Modificar)
+	// permisoWrite:SecureMode_t, tam:N
 	// .........................................................
 	void asignarPropiedadesPermisosYTamanyoDatos( uint8_t props,
 												 SecureMode_t  permisoRead,
@@ -145,6 +158,8 @@ public:
 												 
 
 	// .........................................................
+	//str:texto->escribirDatos()->N
+	//													->Clase(Modificar)
 	// .........................................................
 	uint16_t escribirDatos( const char * str ) {
 	  // Serial.print( " return (*this).laCaracteristica.write( str  = " );
@@ -158,6 +173,8 @@ public:
 	} // ()
 
 	// .........................................................
+	//str:texto->notificarDatos()->N
+	//													 ->Clase(Modificar)
 	// .........................................................
 	uint16_t notificarDatos( const char * str ) {
 	  
@@ -167,12 +184,14 @@ public:
 	} //  ()
 
 	// .........................................................
+	// cb:CallbackCaracteristicaEscrita-> instalarCallbackCaracteristicaEscrita()->Clase(Modificar)
 	// .........................................................
 	void instalarCallbackCaracteristicaEscrita( CallbackCaracteristicaEscrita cb ) {
 	  (*this).laCaracteristica.setWriteCallback( cb );
 	} // ()
 
 	// .........................................................
+	// activar()->Clase(Modificar)
 	// .........................................................
 	void activar() {
 	  err_t error = (*this).laCaracteristica.begin();
@@ -207,6 +226,7 @@ private:
 public:
   
   // .........................................................
+	// nombreServicio_:texto->ServicioEnEmisora()->Clase(Modificar)
   // .........................................................
   ServicioEnEmisora( const char * nombreServicio_ )
 	:
@@ -216,6 +236,7 @@ public:
   } // ()
   
   // .........................................................
+	//  escribeUUID()<-Clase(Consultar)
   // .........................................................
   void escribeUUID() {
 	Serial.println ( "**********" );
@@ -226,12 +247,14 @@ public:
   } // ()
 
   // .........................................................
+	//car:Caracteristica->anyadirCaracteristica()->Clase(Modificar)
   // .........................................................
   void anyadirCaracteristica( Caracteristica & car ) {
 	(*this).lasCaracteristicas.push_back( & car );
   } // ()
 
   // .........................................................
+	// BLEService <-activarServicio()<-Clase(Consultar)
   // .........................................................
   void activarServicio( ) {
 	// entiendo que al llegar aquí ya ha sido configurado
@@ -248,6 +271,7 @@ public:
   } // ()
 
   // .........................................................
+	// BleService<-operator BLEService()
   // .........................................................
   operator BLEService&() {
 	// "conversión de tipo": si pongo esta clase en un sitio donde necesitan un BLEService

@@ -40,12 +40,14 @@ private:
 public:
 
   // .........................................................
+
   // .........................................................
   using CallbackConexionEstablecida = void ( uint16_t connHandle ); // Es una función que establece conexión
   using CallbackConexionTerminada = void ( uint16_t connHandle, uint8_t reason); // Es una función que establece conexión
 
   // .........................................................
 	//											CONSTRUCTOR
+	//nombreEmisora_:texto, fabricanteID_:N,txPower:Z->EmisoraBLE()->Clase(Modificar)
   // .........................................................
   EmisoraBLE( const char * nombreEmisora_, const uint16_t fabricanteID_,
 			  const int8_t txPower_ ) 
@@ -80,6 +82,7 @@ public:
   */
 	
   // .........................................................
+	// encenderEmisora()->Clase(Modificar)
   // .........................................................
   void encenderEmisora() {
 	// Serial.println ( "Bluefruit.begin() " );
@@ -91,6 +94,7 @@ public:
   } // ()
 
   // .........................................................
+	// cbce:CallbackConexionEstablecida ,cbct:CallbackConexionTerminada->encenderEmisora()
   // .........................................................
   void encenderEmisora( CallbackConexionEstablecida cbce,
 						CallbackConexionTerminada cbct ) {
@@ -103,6 +107,7 @@ public:
   } // ()
 
   // .........................................................
+	// detenerAnuncio()<-Clase(Consultar)
   // .........................................................
   void detenerAnuncio() {
 
@@ -121,6 +126,8 @@ public:
   } // ()
 
   // .........................................................
+	// beaconUUID:N, major:Z, minor:Z, rssi:N ->emitirAnuncioIBeacon()<-Clase(Consultar)
+	//																																->Clase(Modificar)
   // .........................................................
   void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, uint8_t rssi ) {
 
@@ -211,6 +218,10 @@ public:
   void emitirAnuncioIBeaconLibre( const char * carga ) {
 
 	const uint8_t tamanyoCarga = strlen( carga );
+	//.........................................................
+	// carga:texto, tamanyoCarga:N->emitirAnuncioIBeaconLibre()->Clase(Modificar)
+	//																												 <-Clase(Consultar)
+	//.........................................................
   */
   void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
 
@@ -275,6 +286,7 @@ public:
   } // ()
 
   // .........................................................
+	// servicio:ServicioEnEmisora->anyadirServicio()->B
   // .........................................................
   bool anyadirServicio( ServicioEnEmisora & servicio ) {
 
@@ -294,6 +306,7 @@ public:
 
   
   // .........................................................
+	// servicio:ServicioEnEmisora->anyadirServicioConSusCaracteristicas()->B
   // .........................................................
 	// Añade un servicio a la emisora cuando no hay características que añadir.
   bool anyadirServicioConSusCaracteristicas( ServicioEnEmisora & servicio ) { 
@@ -301,6 +314,9 @@ public:
   } // 
 
   // .........................................................
+	//servicio:ServicioEnEmisora, restoCaracteristicas:cualquier tipo ->anyadirServicioConSusCaracteristicas()->B
+	//caracteristica:ServicioEnEmisora::Caracteristica,
+	//.........................................................
   template <typename ... T>
   bool anyadirServicioConSusCaracteristicas( ServicioEnEmisora & servicio,
 											 ServicioEnEmisora::Caracteristica & caracteristica,
@@ -313,6 +329,8 @@ public:
   } // ()
 
   // .........................................................
+	//servicio:ServicioEnEmisora, restoCaracteristicas:cualquier tipo ->anyadirServicioConSusCaracteristicasYActivar()->B
+  //.........................................................
   template <typename ... T>
   bool anyadirServicioConSusCaracteristicasYActivar( ServicioEnEmisora & servicio,
 													 // ServicioEnEmisora::Caracteristica & caracteristica,
@@ -327,6 +345,7 @@ public:
   } // ()
 
   // .........................................................
+	// cb:CallbackConexionEstablecida->instalarCallbackConexionEstablecida()
   // .........................................................
 	// Registra la función que se ejecutará cuando se establezca una conexión.
   void instalarCallbackConexionEstablecida( CallbackConexionEstablecida cb ) {
@@ -334,6 +353,7 @@ public:
   } // ()
 
   // .........................................................
+	// cb:CallbackConexionTerminada-> instalarCallbackConexionTerminada()
   // .........................................................
 	// Registra la función que se ejecutará cuando termine una conexión.
   void instalarCallbackConexionTerminada( CallbackConexionTerminada cb ) {
@@ -341,6 +361,7 @@ public:
   } // ()
 
   // .........................................................
+	// connHandle:N->getConexion()->BLEConnection
   // .........................................................
   BLEConnection * getConexion( uint16_t connHandle ) {
 	return Bluefruit.Connection( connHandle );
