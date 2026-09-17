@@ -26,7 +26,7 @@ require_once('../logica/diHola.php');
 //
 // -------------------------------------------------
 
-// ANTES->DESPUÉS (B3): no se comprobaba el método; este endpoint solo hace
+// ANTES->DESPUÉS: no se comprobaba el método; este endpoint solo hace
 //        sentido con GET (no cambia estado).
 if ( $_SERVER["REQUEST_METHOD"] !== "GET" ) {
   header("Content-Type: application/json; charset=utf-8");
@@ -35,7 +35,7 @@ if ( $_SERVER["REQUEST_METHOD"] !== "GET" ) {
   return;
 }
 
-// ANTES->DESPUÉS (V5): la cookie de sesión se creaba con la config por
+// ANTES->DESPUÉS: la cookie de sesión se creaba con la config por
 //        defecto. MOTIVO: HttpOnly evita robo por JS, SameSite=Lax mitiga
 //        CSRF; en producción añadir "secure" => true (HTTPS).
 session_set_cookie_params( [
