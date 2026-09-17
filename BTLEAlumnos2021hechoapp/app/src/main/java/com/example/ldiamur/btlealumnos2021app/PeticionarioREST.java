@@ -39,6 +39,8 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
     private String cuerpoRespuesta = "";
 
     // --------------------------------------------------------------------
+    // metodo:texto, urlDestino:texto, cuerpo:texto,->hacerPeticionREST()->Clase(Modificar)
+    // laRespuesta:RespuestaREST
     // --------------------------------------------------------------------
     public void hacerPeticionREST (String metodo, String urlDestino, String cuerpo, RespuestaREST  laRespuesta) {
         this.elMetodo = metodo;
@@ -50,12 +52,15 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
     }
 
     // --------------------------------------------------------------------
+    // PeticionarioREST()
     // --------------------------------------------------------------------
     public PeticionarioREST() {
         Log.d("clienterestandroid", "constructor()");
     }
 
     // --------------------------------------------------------------------
+    // B<-doInBackground()<-Clase(Consutar)
+    //                 ->Clase(Modificar)
     // --------------------------------------------------------------------
     @Override
     protected Boolean doInBackground(Void... params) {
@@ -135,6 +140,7 @@ public class PeticionarioREST extends AsyncTask<Void, Void, Boolean> {
     } // ()
 
     // --------------------------------------------------------------------
+    // comoFue:B->onPostExecute()<-Clase(Consulta)
     // --------------------------------------------------------------------
     protected void onPostExecute(Boolean comoFue) {
         // llamado tras doInBackground()

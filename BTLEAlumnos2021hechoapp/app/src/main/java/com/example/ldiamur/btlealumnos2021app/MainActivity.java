@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private ScanCallback callbackDelEscaneo = null;
 
     // --------------------------------------------------------------
+    //buscarTodosLosDispositivosBTLE()->Clase(Modificar)
     // --------------------------------------------------------------
     private void buscarTodosLosDispositivosBTLE() {
         Log.d(ETIQUETA_LOG, " buscarTodosLosDispositivosBTL(): empieza ");
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    //resultado:ScanResult->mostrarInformacionDispositivoBTLE()
     // --------------------------------------------------------------
     private void mostrarInformacionDispositivoBTLE( ScanResult resultado ) {
 
@@ -133,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    // dispositivoBuscado:texto->buscarEsteDispositivoBTLE()->Clase(Modificar)
     // --------------------------------------------------------------
     private void buscarEsteDispositivoBTLE(final String dispositivoBuscado ) {
         Log.d(ETIQUETA_LOG, " buscarEsteDispositivoBTLE(): empieza ");
@@ -180,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    // detenerBusquedaDispositivosBTLE()<-Clase(consultar)
+    //                                  ->Clase(Modificar)
     // --------------------------------------------------------------
     private void detenerBusquedaDispositivosBTLE() {
 
@@ -193,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    // v:Vista->botonBuscarDispositivosBTLEPulsado()<-Clase(Consultar)
     // --------------------------------------------------------------
     public void botonBuscarDispositivosBTLEPulsado( View v ) {
         Log.d(ETIQUETA_LOG, " boton buscar dispositivos BTLE Pulsado" );
@@ -200,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    // v:Vista->botonBuscarNuestroDispositivoBTLEPulsado()<-Clase(Consultar)
     // --------------------------------------------------------------
     public void botonBuscarNuestroDispositivoBTLEPulsado( View v ) {
         Log.d(ETIQUETA_LOG, " boton nuestro dispositivo BTLE Pulsado" );
@@ -211,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    // v:Vista->botonDetenerBusquedaDispositivosBTLEPulsado()<-Clase(Consultar)
     // --------------------------------------------------------------
     public void botonDetenerBusquedaDispositivosBTLEPulsado( View v ) {
         Log.d(ETIQUETA_LOG, " boton detener busqueda dispositivos BTLE Pulsado" );
@@ -218,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
     } // ()
 
     // --------------------------------------------------------------
+    // inicializarBlueTooth()->Clase(Modificar)
     // --------------------------------------------------------------
     private void inicializarBlueTooth() {
         Log.d(ETIQUETA_LOG, " inicializarBlueTooth(): obtenemos adaptador BT ");
@@ -262,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // --------------------------------------------------------------
+    // savedInstanceState:Bundle->onCreate()
     // --------------------------------------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -277,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
     } // onCreate()
 
     // --------------------------------------------------------------
+    //requestCode:N, permissions:[texto], grantResults:[Z]->onRequestPermissionsResult()
     // --------------------------------------------------------------
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {

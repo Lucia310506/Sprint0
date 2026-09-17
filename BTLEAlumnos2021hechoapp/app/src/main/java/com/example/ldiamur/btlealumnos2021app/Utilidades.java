@@ -15,6 +15,7 @@ import java.util.UUID;
 public class Utilidades {
 
     // -------------------------------------------------------------------------------
+    //texto:texto->stringToBytes()->[bytes]
     // -------------------------------------------------------------------------------
     public static byte[] stringToBytes ( String texto ) {
         return texto.getBytes();
@@ -22,6 +23,7 @@ public class Utilidades {
     } // ()
 
     // -------------------------------------------------------------------------------
+    // uuid:UUID->stringToUUID()->UUID
     // -------------------------------------------------------------------------------
     public static UUID stringToUUID( String uuid ) {
         if ( uuid.length() != 16 ) {
@@ -41,18 +43,21 @@ public class Utilidades {
     } // ()
 
     // -------------------------------------------------------------------------------
+    // uuid:UUID->uuidToString()->texto
     // -------------------------------------------------------------------------------
     public static String uuidToString ( UUID uuid ) {
         return bytesToString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
     } // ()
 
     // -------------------------------------------------------------------------------
+    // uuid:UUID->uuidToHexString()->texto
     // -------------------------------------------------------------------------------
     public static String uuidToHexString ( UUID uuid ) {
         return bytesToHexString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
     } // ()
 
     // -------------------------------------------------------------------------------
+    // bytes:[bytes]->bytesToString()->texto
     // -------------------------------------------------------------------------------
     public static String bytesToString( byte[] bytes ) {
         if (bytes == null ) {
@@ -67,6 +72,7 @@ public class Utilidades {
     }
 
     // -------------------------------------------------------------------------------
+    // masSignificativos:Z, menosSignificativos:Z->dosLongToBytes()->[byte]
     // -------------------------------------------------------------------------------
     public static byte[] dosLongToBytes( long masSignificativos, long menosSignificativos ) {
         ByteBuffer buffer = ByteBuffer.allocate( 2 * Long.BYTES );
@@ -76,18 +82,21 @@ public class Utilidades {
     }
 
     // -------------------------------------------------------------------------------
+    //bytes:[byte]->bytesToInt()->Z
     // -------------------------------------------------------------------------------
     public static int bytesToInt( byte[] bytes ) {
         return new BigInteger(bytes).intValue();
     }
 
     // -------------------------------------------------------------------------------
+    //bytes:[byte]->bytesToLong()->Z
     // -------------------------------------------------------------------------------
     public static long bytesToLong( byte[] bytes ) {
         return new BigInteger(bytes).longValue();
     }
 
     // -------------------------------------------------------------------------------
+    // bytes:[byte]->bytesToIntOK()->Z
     // -------------------------------------------------------------------------------
     public static int bytesToIntOK( byte[] bytes ) {
         if (bytes == null ) {
@@ -126,6 +135,7 @@ public class Utilidades {
     } // ()
 
     // -------------------------------------------------------------------------------
+    // bytes:[byte]->bytesToHexString()->texto
     // -------------------------------------------------------------------------------
     public static String bytesToHexString( byte[] bytes ) {
 
