@@ -1,3 +1,14 @@
+// -------------------------------------------------------------------
+// ux/logicaFake/hacerLogin.js
+// Lógica "fake" que ejecuta el navegador (JavaScript).
+//   Es el espejo que usa la parte de interfaz (HTML) para no conocer el
+//   lado del servidor: la pantalla llama a hacerLogin(nombre, password, cb)
+//   y esta función hace la llamada remota (AJAX/XMLHttpRequest) al
+//   endpoint REST rest/hacerLogin.php. Cuando llega la respuesta, la
+//   entrega mediante callback(resultado).
+//   En un futuro, esta "fake" puede convertirse en la llamada real o
+//   sustituirse por un fetch() moderno.
+// -------------------------------------------------------------------
 // ---------------------------------------------------
 //
 // versión fake de una función de la lógica

@@ -1,5 +1,18 @@
 <?php
 
+// -------------------------------------------------------------------
+// rest/diHola.php
+// Capa REST (punto de entrada HTTP del servidor).
+//   Es el "waiter" del endpoint: recibe la petición HTTP de saludar,
+//   comprueba que la petición viene de un usuario ya acreditado
+//   (sesión activa) y delega el trabajo real en logica/diHola.php.
+//   Se encarga de:
+//   - leer el usuario de la sesión (no viene en la URL)
+//   - llamar a la función de negocio diHola()
+//   - devolver la respuesta como JSON
+//   No contiene reglas de negocio: solo orquesta HTTP + sesión + JSON.
+// -------------------------------------------------------------------
+
 require_once('../logica/diHola.php');
 
 // -------------------------------------------------
