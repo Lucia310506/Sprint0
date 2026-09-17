@@ -39,17 +39,28 @@ private:
 public:
 //Beacon que se envía.
 // ******************************************
-// 
 //  SE MODIFICA: los datos de identificación de la emisora
 // 
-// ******************************************
+// **************************************************
+//  ANTES->DESPUÉS: RSSI era const int y ahora es const int8_t.
+//  MOTIVO: -53 es negativo y representa un byte con signo; con uint8_t se
+//          emitía como 203 (se perdía el signo del txPower).
+// **************************************************
   EmisoraBLE laEmisora {
 	"GTI-3A", // nombre que la app usa para filtrar
 	  0x004c, // fabricanteID (NO tocar: es Apple, los iBeacon lo exigen)
 	  4 // 			 txPower (potencia de transmisión en dBm)
 	  };
+
+// **************************************************
+//  NOTA DE SEGURIDAD (P7/P16):
+//  ANTES->DESPUÉS: sin cambio de código, solo documentación.
+//  MOTIVO: el estándar iBeacon no autentica el 0x004C, así que cualquier
+//          beacon con el mismo UUID (EPSG-GTI-PROY-3A) se puede suplantar;
+//          riesgo aceptado en este entorno docente.
+// **************************************************
   
-  const int RSSI = -53; // por poner algo, de momento no lo uso
+  const int8_t RSSI = -53; // por poner algo, de momento no lo uso
 
   // ............................................................
   // ............................................................

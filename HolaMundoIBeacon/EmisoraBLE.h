@@ -126,10 +126,14 @@ public:
   } // ()
 
   // .........................................................
-	// beaconUUID:N, major:Z, minor:Z, rssi:N ->emitirAnuncioIBeacon()<-Clase(Consultar)
+	// beaconUUID:N, major:Z, minor:Z, rssi:Z ->emitirAnuncioIBeacon()<-Clase(Consultar)
 	//																																->Clase(Modificar)
+	//
+	// ANTES->DESPUÉS: rssi era uint8_t y es int8_t.
+	// MOTIVO: el txPower del iBeacon es un byte CON SIGNO; con uint8_t, -53
+	//         se convertía a 203 y se perdía el signo (la app lo lee como 0xCB=-53).
   // .........................................................
-  void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, uint8_t rssi ) {
+  void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, int8_t rssi ) {
 
 	//
 	//
@@ -141,6 +145,10 @@ public:
 	//
 	BLEBeacon elBeacon( beaconUUID, major, minor, rssi );
 	// Indica el fabricante del iBeacon.
+	// ANTES->DESPUÉS: sin cambio de código, solo documentación.
+	// MOTIVO: 0x004C (Apple) es obligatorio y el estándar iBeacon NO lleva
+	//         firma ni autenticación: un beacon con el mismo UUID se puede
+	//         suplantar (riesgo P7/P16 aceptado).
 	elBeacon.setManufacturer( (*this).fabricanteID );
 
 	//
@@ -223,7 +231,7 @@ public:
 	//																												 <-Clase(Consultar)
 	//.........................................................
   */
-  void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
+void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
 
 	(*this).detenerAnuncio(); 
 
@@ -237,7 +245,7 @@ public:
 	Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE); //"Este dispositivo utiliza Bluetooth Low Energy y es descubrible".
 
 	// con este parece que no va  !
-	// Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE);
+	// Bluefruit.Advertising.addFlag(BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE);
 
 	//
 	// hasta ahora habrá, supongo, ya puestos los 5 primeros bytes. Efectivamente.
@@ -259,6 +267,19 @@ public:
 	// addData() hay que usarlo sólo una vez. Por eso copio la carga
 	// en el anterior array, donde he dejado 21 sitios libres
 	//
+	// ANTES->DESPUÉS: se añade un guard que evita copiar si no hay carga.
+	// MOTIVO: si carga es nullptr o tamanyoCarga == 0, el memcpy anterior
+	//         podía leer de memoria no reservada y emitir basura.
+	//
+	if ( carga == nullptr || tamanyoCarga == 0 ) {
+	  // nada que copiar: emito el prefijo y el resto '-' por defecto
+	  Bluefruit.Advertising.addData( BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+									 &restoPrefijoYCarga[0],
+									 4+21 ); //Añadimos nuestros datos al Advertising, de que es manufacturer
+	  Globales::elPuerto.escribir( "emitiriBeacon libre SIN carga (puntero nulo o tamaño 0)  \n");
+	  return;
+	} // if
+
 	// memcpy(destino, origen, cantidad);
 	memcpy( &restoPrefijoYCarga[4], &carga[0], ( tamanyoCarga > 21 ? 21 : tamanyoCarga ) ); //memcpy() COPIA bytes de una zona de memoria a otra.
 

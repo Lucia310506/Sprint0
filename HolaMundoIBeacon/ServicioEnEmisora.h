@@ -31,17 +31,30 @@ T *  alReves( T * p, int n ) {
 // ----------------------------------------------------
 // pString:texto, pUint:[N], ->stringAUint8AlReves()->[N]
 // tamMax:Z(Ahora N, no puede haber tamaños negativos)
+//
+// ANTES->DESPUÉS: se añaden null-check y tope de longitud sin depender de '\0'.
+// MOTIVO: si pString/pUint valen nullptr o el string no llega a terminar en
+//         '\0', strlen() podía leer fuera de la zona reservada y provocar un
+//         fallo/crash.
 // ----------------------------------------------------
 uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, uint tamMax ) {
+  if ( pString == nullptr || pUint == nullptr ) {
+    return nullptr; // no hay dónde copiar ni desde qué copiar
+  }
 
-	int longitudString =  strlen( pString );
-	int longitudCopiar = ( longitudString > tamMax ? tamMax : longitudString );
-	// copio nombreServicio -> uuidServicio pero al revés
-	for( int i=0; i<=longitudCopiar-1; i++ ) {
-	  pUint[ tamMax-i-1 ] = pString[ i ];
-	} // for
+  int longitudString = 0;
+  // longitud real sin pasarnos de lo que cabe en el destino (tamMax)
+  while ( pString[ longitudString ] != '\0' &&  longitudString < (int) tamMax ) {
+    longitudString++;
+  } // while
 
-	return pUint;
+  int longitudCopiar = ( longitudString > (int) tamMax ? (int) tamMax : longitudString );
+  // copio nombreServicio -> uuidServicio pero al revés
+  for( int i=0; i<=longitudCopiar-1; i++ ) {
+    pUint[ tamMax-i-1 ] = pString[ i ];
+  } // for
+
+  return pUint;
 } // ()
 
 // ----------------------------------------------------------
@@ -192,11 +205,17 @@ public:
 
 	// .........................................................
 	// activar()->Clase(Modificar)
+	//
+	// ANTES->DESPUÉS: activar() devolvía void y ahora devuelve bool.
+	// MOTIVO: si laCaracteristica.begin() falla, que el resto del programa
+	//         lo sepa y no actúe como si la característica estuviera activa.
 	// .........................................................
-	void activar() {
+	bool activar() {
 	  err_t error = (*this).laCaracteristica.begin();
 	  Globales::elPuerto.escribir(  " (*this).laCaracteristica.begin(); error = " );
 	  Globales::elPuerto.escribir(  error );
+
+	  return ( error == 0 ); // 0 = ERROR_NONE; false si falló
 	} // ()
 
   }; // class Caracteristica
@@ -255,8 +274,13 @@ public:
 
   // .........................................................
 	// BLEService <-activarServicio()<-Clase(Consultar)
-  // .........................................................
-  void activarServicio( ) {
+	//
+	// ANTES->DESPUÉS: activarServicio() devolvía void y ahora bool, y aborta
+	//         si el servicio no arrancó.
+	// MOTIVO: si elServicio.begin() falla no tiene sentido activar
+	//         sus características.
+	// .........................................................
+	bool activarServicio( ) {
 	// entiendo que al llegar aquí ya ha sido configurado
 	// todo: características y servicio
 
@@ -264,10 +288,16 @@ public:
 	Serial.print( " (*this).elServicio.begin(); error = " );
 	Serial.println( error );
 
+	if ( error != 0 ) { // 0 = ERROR_NONE
+	  // no sigo: activar características de un servicio caído no tiene sentido
+	  return false;
+	} // if
+
 	for( auto pCar : (*this).lasCaracteristicas ) {
 	  (*pCar).activar();
 	} // for
 
+	return true;
   } // ()
 
   // .........................................................
